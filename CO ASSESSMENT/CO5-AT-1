@@ -1,0 +1,273 @@
+NAME:I RUPESH
+REG NO : 192511170
+COURSE CODE: CSA0409
+
+QUESTION NUMBER:1
+Optimized Linux File System Layout and Storage Management:
+PROBLEM UNDERSTANDING:
+A server has a total storage capacity of 50 GB. It must efficiently manage:
+-Rapidly growing system logs
+-User files
+-Application data
+-Critical system services
+-Log files must not exceed 10 GB
+-Critical services must continue operating without interruption
+The main challenge is to prevent logs from consuming all available disk space while maintaining reliable system operation.
+CONSTRANT ANYALISIS:
+Requirement   	   Constraint
+Total storage	      50 GB
+System files	      Must have protected space
+User files      	  Need separate storage
+Application data	  Need dedicated space
+Logs              	Maximum 10 GB
+Critical services  	Must continue operating
+Disk utilization	  Must be efficient
+PROPOSED FILE SYSTEM LAYOUT:
+Partition  	Size	    Purpose
+/boot     	1 GB	    Boot files
+/          	10 GB	    Operating system
+/home      	10 GB	    User files
+/var	      8 GB	     Variable data
+/var/log	  10 GB	     System/application logs
+/opt      	6 GB	     Application data
+swap      	5 GB	     Virtual memory
+Total     	50 GB
+LOG MANGEMENT:
+Linux logrotate can be used to control log growth.
+Example configuration:
+sudo nano /etc/logrotate.d/custom
+Example:
+/var/log/*.log {
+    daily
+    rotate 7
+    compress
+    missingok
+    notifempty
+}
+SOLUTION:
+The optimized strategy is:
+-Separate /var/log from /.
+-Allocate a maximum of 10 GB for logs.
+-Use logrotate to automatically rotate and compress logs.
+-Monitor disk usage using df and du.
+-Keep sufficient space for the root filesystem.
+-Keep application and user data in separate partitions.
+JUSTIFICATION:
+-Separating the log partition ensures that rapidly growing logs cannot consume the space required by the operating system.
+-Log rotation and compression further control storage usage.
+-Therefore, the proposed layout satisfies the 50 GB storage constraint, keeps logs within 10 GB, and helps critical services continue running reliably.
+
+QUESTION NUMBER 2:Reducing Frequent Context Switching in a High CPU Workload.
+PROBLEM UNDERSTANDING:
+-The Linux system is experiencing a high CPU workload with frequent context switching.
+-Hardware upgrades are not possible, but real-time processing must still be supported.
+-Frequent context switching introduces overhead because the CPU spends time saving and restoring process states instead of executing useful work.
+CONSTAINT ANALYSIS:
+-Hardware cannot be upgraded.
+-Real-time processing must be supported.
+-CPU utilization must be improved.
+-Context-switching overhead must be reduced.
+-Existing Linux environment should be retained.
+CAUSES OF EXCESSIVE IF CONSTRAINT SWITCHING:
+-Very small scheduling time slices
+-Too many runnable processes
+-Excessive thread creation
+-Poor process priorities
+-Unnecessary background tasks
+-High scheduler overhead
+SOLUTION:
+1. Tune Scheduler Parameters
+Linux scheduler settings can be inspected using:
+sysctl -a | grep sched
+Scheduler-related parameters can be adjusted according to workload requirements.
+2. Use Process Priority
+nice and renice can be used to control process priority.
+nice -n 10 ./program
+For an already running process:
+renice -n 5 -p PID
+Important real-time tasks can be given suitable real-time scheduling policies.
+chrt -f 80 ./program
+3. Reduce Unnecessary Processes
+Running services can be inspected using:
+systemctl --type=service
+Unnecessary services should be disabled where appropriate.
+4. CPU Affinity
+CPU affinity can reduce unnecessary movement of processes between CPUs.
+taskset -c 0 ./program
+For an existing process:
+taskset -cp 0 PID
+5. Kernel Modules
+Kernel modules can provide required functionality without rebuilding the complete kernel.
+Modules can be managed using:
+lsmod
+modprobe
+rmmod
+JUSTIFICATION:
+-Context switching should not simply be eliminated because multitasking requires scheduling. 
+-Instead, unnecessary switching should be reduced through proper scheduling, CPU affinity, process priority, and workload optimization.
+-This improves CPU efficiency while preserving support for real-time processing without requiring hardware upgrades.
+QUESTION NUMBER 3 : Processing 1 Million Log Entries Within 2 Minutes.
+PROBLEM UNDERSTANDING:
+-An administrator must process 1 million log entries per day using only shell scripting.
+-The solution must complete within 2 minutes.
+-Therefore, the script must avoid inefficient operations such as processing each line using a separate external command.
+CONSTRAINT ANALYSIS:
+Requirement      	      Constraint
+Number of entries 	    1,000,000
+Processing method	     Shell scripting
+Maximum time          	2 minutes
+Performance	             High
+External commands	       Should be minimized
+INEFFICIENT APPROACH:
+Avoid:
+while read line
+do
+    echo "$line" | grep "ERROR"
+done < logfile
+This repeatedly invokes external commands and can be very slow for one million entries.
+SOLUTION:
+Use tools designed for high-speed text processing, such as:
+awk
+grep
+sort
+cut
+sed
+For example:
+awk '/ERROR/ {count++} END {print "Errors:", count}' logfile
+To process multiple conditions:
+awk '
+/ERROR/ {error++}
+/WARNING/ {warning++}
+/INFO/ {info++}
+END {
+    print "ERROR:", error
+    print "WARNING:", warning
+    print "INFO:", info
+}' logfile
+JUSTIFICATION:
+processes the input as a stream and avoids creating a new process for every line. 
+Therefore, it is much more efficient than repeatedly executing commands inside a shell loop.
+Using optimized Linux text-processing utilities and parallel processing where appropriate provides a practical way to meet the 2-minute constraint.
+QUESTION NUMBER 4:
+PROBLEM UNDERSTANDING:
+-A Linux system has multiple background services. One faulty process is consuming approximately 90% of CPU resources.
+-The system cannot be restarted because critical services must remain active.
+-Therefore, the faulty process must be identified, monitored, and controlled without rebooting the system.
+CONSTRAINT ANALYSIS:
+-Faulty process uses 90% CPU.
+-System restart is not allowed.
+-Critical services must remain unaffected.
+-The faulty process must be identified.
+-CPU usage must be controlled.
+-Monitoring must continue after intervention.
+Step 1: Identify the Process
+Use:
+top
+or:
+ps aux --sort=-%cpu | head
+This displays processes in descending CPU usage.
+Example:
+USER   PID   %CPU   COMMAND
+root   2456  90.0   faulty_process
+Here, PID 2456 is consuming excessive CPU.
+Step 2: Monitor the Process
+Use:
+pidstat -p 2456 1
+This monitors the process every second.
+Another option is:
+top -p 2456
+Step 3: Reduce Process Priority
+If the process is not critical, reduce its priority:
+renice +10 -p 2456
+This allows other important processes to receive more CPU time.
+Step 4: Limit CPU Usage
+If available on the system, CPU resource limits can be applied using systemd or cgroups.
+For a systemd service:
+sudo systemctl set-property faulty.service CPUQuota=20%
+This restricts the service to approximately 20% CPU.
+Step 5: Stop the Faulty Process if Necessary
+If the process continues to affect critical services:
+kill 2456
+If it does not terminate:
+kill -9 2456
+SIGKILL should be used only when necessary because the process cannot clean up before termination.
+JUSTIFICATION:
+-Using top, ps, pidstat, renice, and systemd resource controls allows the faulty process to be controlled without restarting the server.
+-This approach protects critical services while recovering CPU resources and maintaining system availability.
+QUESTION NUMBER 5;
+PROBLEM UNDERSTANDING:
+A physical server has:
+Total RAM = 16 GB
+Number of VMs = 5
+Minimum RAM required per VM = 2 GB
+Host operating system requires = 4 GB
+The objective is to allocate memory efficiently while ensuring that all VMs operate smoothly.
+CONSTRAINT ANALYSIS:
+The total memory required by the host and minimum VM allocation is:
+Host OS = 4 GB
+5 VMs × 2 GB = 10 GB
+Total required = 4 GB + 10 GB
+              = 14 GB
+Available RAM:
+16 GB
+Remaining RAM:
+16 GB - 14 GB = 2 GB
+Therefore, the system has 2 GB of spare RAM after satisfying all minimum requirements.
+Basic Allocation
+Resource	RAM
+Host OS	4 GB
+VM1	2 GB
+VM2	2 GB
+VM3	2 GB
+VM4	2 GB
+VM5	2 GB
+Spare RAM	2 GB
+Total	16 GB
+Efficient Allocation Strategy
+The host should reserve 4 GB to maintain stable operation.
+Each VM should initially receive its required 2 GB:
+
+VM1 = 2 GB
+VM2 = 2 GB
+VM3 = 2 GB
+VM4 = 2 GB
+VM5 = 2 GB
+The remaining 2 GB should not be permanently assigned unless required.
+It can be used for:
+Increasing memory of high-demand VMs
+Host memory cache
+Temporary workload spikes
+Memory ballooning
+Virtualization overhead
+Dynamic Allocation
+A virtualization platform can dynamically adjust VM memory based on workload.
+For example:
+
+Host OS       - 4 GB reserved
+VM1           - 2 GB
+VM2           - 2 GB
+VM3           - 2 GB
+VM4           - 2 GB
+VM5           - 2 GB
+Spare         - 2 GB
+If VM3 requires additional memory:
+VM3 - 4 GB
+The additional 2 GB can be taken from the spare memory.
+Memory Monitoring
+Linux memory can be monitored using:
+free -h
+and:
+vmstat
+For virtual machines, the hypervisor's memory monitoring tools should also be used.
+Avoid Overcommitment
+The minimum allocation should always be maintained:
+Each VM >= 2 GB
+Host >= 4 GB
+Therefore, allocating more than the available physical memory without proper virtualization support should be avoided.
+ JUSTIFICATION:
+The allocation satisfies every constraint:
+-Host receives the required 4 GB.
+-All five VMs receive at least 2 GB.
+-Total minimum allocation is 14 GB.
+-2 GB remains available for workload spikes and virtualization overhead.
+-Dynamic allocation provides better resource utilization than permanently assigning all 16 GB.
