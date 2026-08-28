@@ -1,0 +1,223 @@
+NAME:I RUPESH 
+REG N0 : 1922511170
+COURSE CODE:CSA0409
+
+QUESTION NUMBER 1: DISKSPACE MANGEMENT
+Problem Understanding:
+-The system may face disk overflow because log files continuously increase in size. 
+-The disk usage must be monitored and unnecessary log files should be deleted or compressed whenever disk utilization exceeds 80%.
+Input:
+-Current disk usage
+-Disk utilization threshold
+-List of log files and their sizes
+Output:
+-Reduced disk utilization
+-Deleted or compressed log files
+-Final disk usage
+Constraint:
+-Disk utilization should not remain above 80%.
+-Larger log files should be processed first.
+-File deletion or compression should continue until usage becomes 80% or below.
+ALGORITHM:
+-Set the disk usage threshold to 80%.
+-Get the current disk usage.
+-Check whether disk usage exceeds 80%.
+-If it exceeds 80%, identify all log files.
+-Sort the log files by size in descending order.
+-Process each log file starting from the largest.
+-Delete or compress the file.
+-Recalculate disk usage.
+-Stop when disk usage becomes 80% or below.
+-Display the final disk usage.
+PSEUDO CODE:
+BEGIN
+SET threshold = 80%
+SET usage = GET_DISK_USAGE()
+IF usage > threshold THEN
+    log_files = GET_LOG_FILES()
+    SORT log_files BY size DESCENDING
+    FOR each file IN log_files DO
+        IF file IS unnecessary THEN
+            DELETE file
+        ELSE
+            COMPRESS file
+        ENDIF
+        usage = GET_DISK_USAGE()
+        IF usage <= threshold THEN
+            BREAK
+        ENDIF
+    ENDFOR
+ENDIF
+PRINT "Final disk usage = ", usage
+END
+
+QUESTION NUMBER 2: PRIORITY BASED CPU SCHEDULING
+PROBLEM UNDERSTANDING:
+-The CPU should execute important processes first based on their priority. 
+-The process with the highest priority gets CPU time first.
+-If a process is not completed, its priority is slightly reduced so that other processes also get a chance to execute.
+INPUT:
+-List of processes
+-Priority of each process
+-Process completion status
+OUTPUT:
+-Process execution order
+-Completion of all processes
+CONSTRAINT:
+-Higher-priority processes should execute first.
+-Every process should get CPU time.
+-Starvation of low-priority processes should be avoided.
+ALGORITHM
+Read the process list.
+-Arrange the processes according to priority.
+-Select the process with the highest priority.
+-Give CPU time to the process.
+-Execute the process.
+-If it is completed, remove it.
+-If it is not completed, reduce its priority slightly.
+-Add it back to the list.
+-Continue until all processes are completed.
+PSEUDOCODE:
+BEGIN
+   GET process list
+    SORT processes according to priority
+    WHILE process list is not empty DO
+        SELECT the process with highest priority
+        GIVE CPU time to the process
+        RUN the process
+        IF process is completed THEN
+            REMOVE the process from the list
+        ELSE
+            REDUCE its priority slightly
+            ADD the process back to the list
+        ENDIF
+    ENDWHILE
+    PRINT "All processes are completed"
+END
+
+QUESTION NUMBER 3:RAM ALLOCATION FOR VIRTUAL MACHINES
+PROBLEM UNDERSTANDING:
+-The system has 16 GB RAM. Out of this, 4 GB is reserved for the host operating system. 
+-The remaining RAM is given to virtual machines. Each virtual machine needs at least 2 GB RAM.
+INPUT:
+-Total RAM = 16 GB
+-Host reserved RAM = 4 GB
+-Number of virtual machines
+-Minimum RAM required = 2 GB
+OUTPUT:
+-RAM allocated to each VM
+-Remaining RAM
+-Insufficient memory message if required
+CONSTRAINT:
+-4 GB must be reserved for the host.
+-Each VM needs at least 2 GB.
+-RAM should not be allocated if there is not enough memory.
+ALGORITHM:
+-Set total RAM to 16 GB.
+-Reserve 4 GB for the host.
+-Calculate the remaining RAM.
+-Read the number of VMs.
+-Check available RAM for each VM.
+-Allocate 2 GB if enough RAM is available.
+-Reduce the available RAM.
+-If there is not enough RAM, display an error message.
+-Repeat for all VMs.
+PSEUDOCODE:
+BEGIN
+SET total RAM = 16 GB
+    SET host RAM = 4 GB
+    available RAM = total RAM - host RAM
+    GET number of VMs
+    SET minimum RAM = 2 GB
+    FOR each VM DO
+        IF available RAM >= minimum RAM THEN
+            GIVE 2 GB RAM to the VM
+            available RAM = available RAM - 2 GB
+            PRINT "RAM allocated to VM"
+        ELSE
+            PRINT "Insufficient memory"
+        ENDIF
+    ENDFOR
+    PRINT remaining RAM
+END
+
+QUESTION 4 – HYPERVISOR SELECTION:
+PROBLEM UNDERSTANDING:
+-The system needs to select the most suitable hypervisor based on performance, budget, and hardware access. 
+-A Type 1 hypervisor is suitable when high performance and direct hardware access are required. 
+-A Type 2 hypervisor is suitable when the budget is low.
+INPUT:
+-Performance requirement
+-Budget
+-Hardware access
+OUTPUT:
+-Selected hypervisor
+-Reason for selection
+CONSTRAINT:
+-Type 1 should be selected for high performance and direct hardware access.
+-Type 2 can be selected when the budget is low.
+-The selection should satisfy the system requirements.
+ALGORITHM:
+-Get the performance requirement.
+-Get the budget.
+-Check hardware access.
+-If high performance and hardware access are required, select Type 1.
+-Otherwise, if the budget is low, select Type 2.
+-Otherwise, select Type 1.
+-Display the selected hypervisor.
+PSEUDOCODE:
+BEGIN
+GET performance requirement
+    GET budget
+    GET hardware access
+IF performance is HIGH AND hardware access is TRUE THEN
+hypervisor = "Type 1 Hypervisor"
+    ELSE IF budget is LOW THEN
+        hypervisor = "Type 2 Hypervisor"
+    ELSE
+        hypervisor = "Type 1 Hypervisor"
+    ENDIF
+    PRINT "Selected Hypervisor: ", hypervisor
+END
+
+QUESTIN NUMBER 5-CPU AND MEMORY RESOURCE MANAGEMENT USING CGROUPS
+PROBLEM UNDERSTANDING:
+-Different applications may use too much CPU or memory and affect the performance of other applications.
+-Cgroups can be used to control the resources given to each application.
+INPUT:
+-List of applications
+-CPU limit
+-Memory limit
+-Processes of each application
+OUTPUT:
+-CPU limit for each application
+-Memory limit for each application
+-Processes assigned to the correct cgroup
+CONSTRAINT:
+-Each application should have CPU and memory limits.
+-Applications should not use more resources than their limits.
+-Processes should be assigned to their respective cgroups.
+ALGORITHM:
+-Get the list of applications.
+-Select one application.
+-Create a cgroup for that application.
+-Set its CPU limit.
+-Set its memory limit.
+-Assign its processes to the cgroup.
+-Repeat the same process for all applications.
+-Display the resource limits.
+PSEUDOCODE:
+BEGIN
+    GET application list
+   FOR each application DO
+        CREATE a cgroup for the application
+        SET CPU limit
+        SET memory limit
+       GET all processes of the application
+        FOR each process DO
+            ASSIGN process to the cgroup
+        ENDFOR
+        PRINT "Resource limits set for the application"
+    ENDFOR
+    PRINT "CPU and memory management completed"
+END
